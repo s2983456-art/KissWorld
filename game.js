@@ -89,6 +89,7 @@ const BGM_VOLUME_BY_KEY = {
 const SFX_DEFAULT_VOLUME = 0.72;
 const SLOT_ROW_STOP_VOLUME = 0.1;
 const MASTER_VOLUME_KEY = "kissworld-master-volume-v1";
+const DEFAULT_MASTER_VOLUME = 0.5;
 
 const WORLD = {
   width: 2600,
@@ -2340,10 +2341,12 @@ window.addEventListener("pointerdown", unlockAudioByUserGesture, { passive: true
 
 function loadMasterVolume() {
   try {
-    const stored = Number(localStorage.getItem(MASTER_VOLUME_KEY));
-    return Number.isFinite(stored) ? clamp(stored, 0, 1) : 1;
+    const raw = localStorage.getItem(MASTER_VOLUME_KEY);
+    if (raw === null) return DEFAULT_MASTER_VOLUME;
+    const stored = Number(raw);
+    return Number.isFinite(stored) ? clamp(stored, 0, 1) : DEFAULT_MASTER_VOLUME;
   } catch (error) {
-    return 1;
+    return DEFAULT_MASTER_VOLUME;
   }
 }
 
