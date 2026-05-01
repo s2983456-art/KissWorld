@@ -4579,8 +4579,7 @@ function getSavedGameSummary() {
     const day = Math.max(1, Number(payload.currentDay) || 1);
     const chapter = getSavedGameChapterLabel(payload);
     const fee = Math.max(0, Number(payload.shellFee) || 0);
-    const mapId = clamp(Number(payload.currentMapIndex) || 0, 0, MAP_COUNT - 1);
-    return `存檔：${chapter}｜第 ${day} 天｜地圖 ${mapId}.png｜護貝費 ${fee}`;
+    return `存檔：${chapter}｜第 ${day} 天｜護貝費 ${fee}`;
   } catch (error) {
     return "存檔讀取異常，建議重新開始或檢查瀏覽器儲存。";
   }
@@ -11082,6 +11081,7 @@ function startSmokerDefeatDialogue(target) {
       { actor: target, speaker: target.label, body: "趕緊去蒐集護貝費給我。" },
       { actor: player, speaker: player.label, body: "我哪來的護貝費啊..." },
       { actor: target, speaker: target.label, body: "HOTEL往右走有一些肥宅，去找他們要吧。" },
+      { actor: target, speaker: target.label, body: "順便記得去地舖補血，漢堡。" },
     ],
     null,
     target
