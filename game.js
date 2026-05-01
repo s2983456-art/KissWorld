@@ -27,6 +27,7 @@ const loadingScreenEl = document.getElementById("loading-screen");
 const loadingProgressTextEl = document.getElementById("loading-progress-text");
 const loadingProgressFillEl = document.getElementById("loading-progress-fill");
 const loadingStageTextEl = document.getElementById("loading-stage-text");
+const testPanelEl = document.getElementById("test-panel");
 const instantKillToggleEl = document.getElementById("instant-kill-toggle");
 const heroOneHitKoToggleEl = document.getElementById("hero-one-hit-ko-toggle");
 const noViolationStreamToggleEl = document.getElementById("no-violation-stream-toggle");
@@ -90,6 +91,8 @@ const SFX_DEFAULT_VOLUME = 0.72;
 const SLOT_ROW_STOP_VOLUME = 0.1;
 const MASTER_VOLUME_KEY = "kissworld-master-volume-v1";
 const DEFAULT_MASTER_VOLUME = 0.5;
+const DEBUG_MODE_PARAM = "hamburger";
+const DEBUG_MODE_ENABLED = new URLSearchParams(window.location.search).get("debug") === DEBUG_MODE_PARAM;
 
 const WORLD = {
   width: 2600,
@@ -2094,6 +2097,7 @@ function createDefaultChapter3State() {
     streamTutorialDone: false,
     streamCompleted: false,
     lastLivestreamDay: 0,
+    streamAssistLevel: 0,
     completed: false,
   };
 }
@@ -2170,6 +2174,7 @@ const characterProgress = Object.fromEntries(
   MENU_CHARACTER_IDS.map((actorId) => [actorId, createDefaultCharacterProgress()])
 );
 
+initializeDebugModeUi();
 battleActionEl.addEventListener("click", handleBattleAction);
 menuContentEl.addEventListener("click", handleMenuContentClick);
 canvas.addEventListener("contextmenu", handleCanvasContextMenu);
@@ -2348,6 +2353,13 @@ function loadMasterVolume() {
   } catch (error) {
     return DEFAULT_MASTER_VOLUME;
   }
+}
+
+function initializeDebugModeUi() {
+  if (!testPanelEl) return;
+  testPanelEl.hidden = !DEBUG_MODE_ENABLED;
+  testPanelEl.setAttribute("aria-hidden", DEBUG_MODE_ENABLED ? "false" : "true");
+  testPanelEl.classList.toggle("is-enabled", DEBUG_MODE_ENABLED);
 }
 
 function initializeMasterVolumeControl() {
@@ -13741,6 +13753,7 @@ function loadGame() {
         ...(payload.chapter3State?.bebeCollab || {}),
       },
     };
+    chapter3State.streamAssistLevel = clamp(Number(chapter3State.streamAssistLevel) || 0, 0, STREAM_CHAT_ASSIST_MAX);
     normalizeChapter3DailyState();
     chapter4State = {
       ...createDefaultChapter4State(),
@@ -17774,6 +17787,8 @@ function splitChapterCompleteText(text) {
 }
 
 const STREAM_DURATION = 45;
+const STREAM_CHAT_ASSIST_STEP = 0.12;
+const STREAM_CHAT_ASSIST_MAX = 12;
 const STREAM_LAYOUT = {
   video: { x: 42, y: 54, width: 748, height: 594 },
   chat: { x: 820, y: 54, width: 416, height: 594 },
@@ -17903,7 +17918,7 @@ function createBaseStreamState(phase) {
     donations: [],
     hudPopups: [],
     contextMenu: null,
-    spawn: { chat: 0.35, video: 2.4, donation: 1.4 },
+    spawn: { chat: Math.min(0.9, 0.35 * getLivestreamChatDelayScale()), video: 2.4, donation: 1.4 },
     result: null,
     tutorial: null,
   };
@@ -17951,6 +17966,23 @@ function beginLivestreamRun() {
   createBaseStreamState("live");
 }
 
+function getLivestreamAssistLevel() {
+  return clamp(Math.floor(Number(chapter3State.streamAssistLevel) || 0), 0, STREAM_CHAT_ASSIST_MAX);
+}
+
+function getLivestreamChatDelayScale() {
+  return 1 + getLivestreamAssistLevel() * STREAM_CHAT_ASSIST_STEP;
+}
+
+function getNextStreamChatDelay() {
+  return (0.58 + Math.random() * 0.64) * getLivestreamChatDelayScale();
+}
+
+function lowerLivestreamDifficulty() {
+  chapter3State.streamAssistLevel = clamp(getLivestreamAssistLevel() + 1, 0, STREAM_CHAT_ASSIST_MAX);
+  saveGame();
+}
+
 function setupStreamTutorialStep(step) {
   if (!streamState?.tutorial) return;
   streamState.tutorial.step = step;
@@ -17988,7 +18020,7 @@ function updateLivestream(delta) {
 
   if (streamState.spawn.chat <= 0) {
     spawnStreamChat();
-    streamState.spawn.chat = 0.58 + Math.random() * 0.64;
+    streamState.spawn.chat = getNextStreamChatDelay();
   }
   if (streamState.spawn.video <= 0) {
     spawnStreamVideo();
@@ -19119,10 +19151,6 @@ function handleEndingKey(event) {
       if (event.code === CONFIRM_CODE) restartChapter4Ending4Choice();
       return;
     }
-    if (endingState.retryLivestream) {
-      if (event.code === CONFIRM_CODE) confirmEndingRetryChoice();
-      return;
-    }
     if (event.code === "ArrowUp" || event.code === "ArrowDown") {
       endingState.retryChoiceIndex = endingState.retryChoiceIndex === 0 ? 1 : 0;
       return;
@@ -19143,6 +19171,11 @@ function handleEndingKey(event) {
 
 function confirmEndingRetryChoice() {
   if (!endingState?.retryPrompt) return;
+  if (endingState.retryLivestream) {
+    if (endingState.retryChoiceIndex === 0) lowerLivestreamDifficulty();
+    restartLivestreamFromEnding();
+    return;
+  }
   if (endingState.retryChoiceIndex === 0) {
     restartLivestreamFromEnding();
     return;
@@ -19358,7 +19391,7 @@ function drawEndingRetryPrompt() {
   const isRevivePrompt = Boolean(endingState.reviveXiao);
   const isContinuePrompt = Boolean(endingState.continueGame);
   const isChapter4ChoicePrompt = Boolean(endingState.retryChapter4Choice);
-  const isSingleOption = isRevivePrompt || isContinuePrompt || endingState.retryLivestream || isChapter4ChoicePrompt;
+  const isSingleOption = isRevivePrompt || isContinuePrompt || isChapter4ChoicePrompt;
   const panel = isSingleOption
     ? { x: 372, y: 282, width: 536, height: 160 }
     : { x: 372, y: 414, width: 536, height: 210 };
@@ -19378,7 +19411,9 @@ function drawEndingRetryPrompt() {
       ? "要繼續遊戲嗎？"
       : isChapter4ChoicePrompt
         ? "要重來嗎？"
-      : "要重新直播挽回嗎？";
+        : endingState.retryLivestream
+          ? "要降低直播難度嗎？"
+          : "要重新直播挽回嗎？";
   ctx.fillText(promptTitle, 640, isSingleOption ? 324 : 462);
   const options = isRevivePrompt
     ? ["復活蕭政銘"]
@@ -19386,7 +19421,9 @@ function drawEndingRetryPrompt() {
       ? [endingState.continueLabel || "繼續遊戲"]
       : isChapter4ChoicePrompt
         ? ["重來"]
-      : ["重新直播"];
+        : endingState.retryLivestream
+          ? ["降低難度後重新直播", "維持難度重新直播"]
+          : ["重新直播"];
   options.forEach((label, index) => {
     const selected = endingState.retryChoiceIndex === index;
     const x = 460;
@@ -19411,24 +19448,32 @@ function updateEndingPromptDom() {
   const isRevivePrompt = Boolean(endingState.reviveXiao);
   const isContinuePrompt = Boolean(endingState.continueGame);
   const isChapter4ChoicePrompt = Boolean(endingState.retryChapter4Choice);
+  const isLivestreamPrompt = Boolean(endingState.retryLivestream);
   const title = isRevivePrompt
     ? "要復活蕭政銘嗎？"
     : isContinuePrompt
       ? "要繼續遊戲嗎？"
       : isChapter4ChoicePrompt
         ? "要重來嗎？"
-      : "要重新直播挽回嗎？";
-  const option = isRevivePrompt
+        : isLivestreamPrompt
+          ? "要降低直播難度嗎？"
+          : "要重新直播挽回嗎？";
+  const options = isRevivePrompt
     ? "復活蕭政銘"
     : isContinuePrompt
-      ? (endingState.continueLabel || "繼續遊戲")
+      ? [endingState.continueLabel || "繼續遊戲"]
       : isChapter4ChoicePrompt
-        ? "重來"
-      : "重新直播";
+        ? ["重來"]
+        : isLivestreamPrompt
+          ? ["降低難度後重新直播", "維持難度重新直播"]
+          : ["重新直播"];
+  const optionList = Array.isArray(options) ? options : [options];
   endingPromptEl.innerHTML = `
     <div class="ending-prompt-title">${escapeHtml(title)}</div>
-    <div class="ending-prompt-option">${escapeHtml(option)}</div>
-    <div class="ending-prompt-tip">Z 確認</div>
+    ${optionList.map((option, index) => `
+      <div class="ending-prompt-option ${endingState.retryChoiceIndex === index ? "is-selected" : "is-muted"}">${escapeHtml(option)}</div>
+    `).join("")}
+    <div class="ending-prompt-tip">${optionList.length > 1 ? "上下選擇，Z 確認" : "Z 確認"}</div>
   `;
   endingPromptEl.classList.remove("hidden");
 }

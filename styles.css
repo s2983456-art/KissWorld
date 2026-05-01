@@ -113,6 +113,20 @@ body {
   box-shadow: 0 0 20px rgba(117, 244, 178, 0.2);
 }
 
+.ending-prompt-option.is-muted {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.72);
+  box-shadow: none;
+}
+
+.ending-prompt-option.is-selected {
+  border-color: #75f4b2;
+  background: rgba(117, 244, 178, 0.25);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(117, 244, 178, 0.2);
+}
+
 .ending-prompt-tip {
   color: rgba(255, 255, 255, 0.64);
   font-size: 17px;
@@ -202,6 +216,10 @@ body {
   flex-wrap: wrap;
   gap: 10px;
   padding: 8px 0 2px;
+}
+
+.test-panel.is-enabled {
+  display: flex;
 }
 
 .test-toggle {
