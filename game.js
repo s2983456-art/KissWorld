@@ -19386,61 +19386,6 @@ function drawEnding3ContractNotice() {
 
 function drawEndingRetryPrompt() {
   updateEndingPromptDom();
-  ctx.save();
-  ctx.globalAlpha = 1;
-  const isRevivePrompt = Boolean(endingState.reviveXiao);
-  const isContinuePrompt = Boolean(endingState.continueGame);
-  const isChapter4ChoicePrompt = Boolean(endingState.retryChapter4Choice);
-  const isSingleOption = isRevivePrompt || isContinuePrompt || isChapter4ChoicePrompt;
-  const panel = isSingleOption
-    ? { x: 372, y: 282, width: 536, height: 160 }
-    : { x: 372, y: 414, width: 536, height: 210 };
-  ctx.fillStyle = "rgba(8, 14, 30, 0.96)";
-  roundRect(panel.x, panel.y, panel.width, panel.height, 24);
-  ctx.fill();
-  ctx.strokeStyle = "rgba(255, 225, 111, 0.55)";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = "#ffe16f";
-  ctx.font = "bold 28px 'Segoe UI', 'Noto Sans TC', sans-serif";
-  const promptTitle = isRevivePrompt
-    ? "要復活蕭政銘嗎？"
-    : isContinuePrompt
-      ? "要繼續遊戲嗎？"
-      : isChapter4ChoicePrompt
-        ? "要重來嗎？"
-        : endingState.retryLivestream
-          ? "要降低直播難度嗎？"
-          : "要重新直播挽回嗎？";
-  ctx.fillText(promptTitle, 640, isSingleOption ? 324 : 462);
-  const options = isRevivePrompt
-    ? ["復活蕭政銘"]
-    : isContinuePrompt
-      ? [endingState.continueLabel || "繼續遊戲"]
-      : isChapter4ChoicePrompt
-        ? ["重來"]
-        : endingState.retryLivestream
-          ? ["降低難度後重新直播", "維持難度重新直播"]
-          : ["重新直播"];
-  options.forEach((label, index) => {
-    const selected = endingState.retryChoiceIndex === index;
-    const x = 460;
-    const y = (isSingleOption ? 364 : 500) + index * 50;
-    ctx.fillStyle = selected ? "rgba(117, 244, 178, 0.25)" : "rgba(255, 255, 255, 0.08)";
-    roundRect(x, y, 360, 38, 12);
-    ctx.fill();
-    ctx.strokeStyle = selected ? "#75f4b2" : "rgba(255,255,255,0.16)";
-    ctx.stroke();
-    ctx.fillStyle = selected ? "#ffffff" : "rgba(255,255,255,0.72)";
-    ctx.font = "bold 22px 'Segoe UI', 'Noto Sans TC', sans-serif";
-    ctx.fillText(label, 640, y + 20);
-  });
-  ctx.fillStyle = "rgba(255,255,255,0.62)";
-  ctx.font = "17px 'Segoe UI', 'Noto Sans TC', sans-serif";
-  ctx.fillText(isSingleOption ? "Z 確認" : "上下選擇，Z 確認", 640, isSingleOption ? 418 : 598);
-  ctx.restore();
 }
 
 function updateEndingPromptDom() {
