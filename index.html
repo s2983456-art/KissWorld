@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KissWorld</title>
+  <meta name="description" content="親親世界 KissWorld">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="KissWorld">
+  <meta property="og:description" content="親親世界 KissWorld">
+  <meta property="og:image" content="./assests/title/Preview.PNG">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="KissWorld">
+  <meta name="twitter:description" content="親親世界 KissWorld">
+  <meta name="twitter:image" content="./assests/title/Preview.PNG">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="game-card">
+      <canvas id="game" width="1280" height="720" aria-label="KissWorld game"></canvas>
+      <img id="ending-media" class="ending-media hidden" alt="結局動畫" aria-hidden="true">
+      <section id="ending-prompt" class="ending-prompt hidden" aria-live="polite"></section>
+      <section id="loading-screen" class="loading-screen progress-loading" aria-label="Loading">
+        <div class="loading-panel">
+          <div class="loading-title">載入中</div>
+          <div id="loading-progress-text" class="loading-progress-text">準備載入素材...</div>
+          <div class="loading-progress-bar">
+            <div id="loading-progress-fill" class="loading-progress-fill"></div>
+          </div>
+          <div id="loading-stage-text" class="loading-stage-text">初始化</div>
+        </div>
+      </section>
+      <section id="battle-ui" class="battle-ui hidden" aria-live="polite">
+        <div class="battle-topbar">
+          <div class="battle-stage"><span id="battle-stage">第 1 戰</span></div>
+          <div class="battle-score"><span id="battle-player-hp-text">0/0</span><span class="battle-versus">VS</span><span id="battle-enemy-hp-text">0/0</span></div>
+          <div class="battle-hp-row">
+            <div class="battle-hp">
+              <div id="battle-player-hp-fill" class="battle-hp-fill player"></div>
+            </div>
+            <div class="battle-hp">
+              <div id="battle-enemy-hp-fill" class="battle-hp-fill enemy"></div>
+            </div>
+          </div>
+        </div>
+
+        <section class="slot-battle-layout">
+          <section class="slot-board player-board">
+            <div class="slot-board-head">
+              <span>我方技能盤</span>
+              <strong id="battle-player-status">待機</strong>
+            </div>
+            <div id="player-slot-grid" class="slot-grid" aria-label="我方 5x5 技能盤"></div>
+          </section>
+          <section class="slot-board enemy-board">
+            <div class="slot-board-head">
+              <span>敵方技能盤</span>
+              <strong id="battle-enemy-status">待機</strong>
+            </div>
+            <div id="enemy-slot-grid" class="slot-grid" aria-label="敵方 5x5 技能盤"></div>
+          </section>
+        </section>
+
+        <div id="battle-log" class="battle-log">準備轉動技能盤。</div>
+        <section class="battle-team-panel">
+          <div class="battle-team-title">技能池</div>
+          <div id="battle-team-list" class="battle-team-list"></div>
+        </section>
+        <button id="battle-action" class="battle-action" type="button">挑戰</button>
+      </section>
+      <button id="battle-auto-toggle" class="battle-auto-toggle hidden" type="button">自動 OFF</button>
+      <button id="battle-speed-toggle" class="battle-auto-toggle battle-speed-toggle hidden" type="button">2倍速 OFF</button>
+      <label id="master-volume-control" class="master-volume-control" aria-label="音量調整">
+        <span class="master-volume-label">音量</span>
+        <input id="master-volume-slider" class="master-volume-slider" type="range" min="0" max="100" step="1" value="100">
+        <span id="master-volume-value" class="master-volume-value">100%</span>
+      </label>
+      <section id="dialogue" class="dialogue hidden" aria-live="polite">
+        <div class="dialogue-speaker" id="dialogue-speaker">角色</div>
+        <div class="dialogue-body" id="dialogue-body"></div>
+        <div class="dialogue-tip">按 Z 繼續</div>
+      </section>
+      <section id="game-menu" class="game-menu hidden" aria-live="polite">
+        <div id="menu-content" class="menu-content"></div>
+      </section>
+    </section>
+    <section class="test-panel" aria-label="測試開關" aria-hidden="true" hidden>
+      <label class="test-toggle">
+        <input id="instant-kill-toggle" type="checkbox">
+        <span class="test-toggle-ui" aria-hidden="true"></span>
+        <span class="test-toggle-text">測試模式：我方攻擊秒殺</span>
+      </label>
+      <label class="test-toggle">
+        <input id="hero-one-hit-ko-toggle" type="checkbox">
+        <span class="test-toggle-ui" aria-hidden="true"></span>
+        <span class="test-toggle-text">測試模式：親親獸被打即死</span>
+      </label>
+      <label class="test-toggle">
+        <input id="no-violation-stream-toggle" type="checkbox">
+        <span class="test-toggle-ui" aria-hidden="true"></span>
+        <span class="test-toggle-text">測試模式：直播無違規，結算人氣+1000</span>
+      </label>
+      <div class="test-chapter-buttons" aria-label="章節測試">
+        <button type="button" class="test-chapter-button" data-test-chapter="1">第一章</button>
+        <button type="button" class="test-chapter-button" data-test-chapter="2">第二章</button>
+        <button type="button" class="test-chapter-button" data-test-chapter="3">第三章</button>
+        <button type="button" class="test-chapter-button" data-test-chapter="4">第四章</button>
+        <button type="button" class="test-chapter-button" data-test-chapter="4-2">第四章之二</button>
+        <button type="button" class="test-chapter-button" data-test-chapter="4-3">第四章之三</button>
+        <button type="button" class="test-chapter-button" data-test-chapter="5">第五章</button>
+        <button type="button" class="test-chapter-button" id="shell-fee-test-button">+1000護貝費</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="./game.js"></script>
+</body>
+</html>
