@@ -9584,6 +9584,8 @@ function startChapter4EndingPages() {
   startChapterCompleteTransition("...", () => {
     startChapterCompleteTransition("第四章 VT綁架事件...", () => {
       startChapterCompleteTransition("以及...", () => {
+        const _3qSfx = new Audio("./assests/skill_effect/unique_sound/3Q.mp3");
+        _3qSfx.play().catch(() => {});
         startChapterCompleteTransition("Thank you 久田...完", () => {
           startChapterCompleteTransition("幾天過後...", () => {
             startSceneFadeIn(startChapter4PostRescueDiscussion, MAP_CHANGE_FADE_IN_TIME);
