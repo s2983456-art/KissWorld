@@ -47,6 +47,7 @@ titleVideo.preload = "auto";
 const uniqueSoundCache = new Map();
 const UNIQUE_SKILL_SOUND_SOURCES = {
   hisada_the_world: "./assests/skill_effect/unique_sound/9.mp3",
+  hisada_3Q: "./assests/skill_effect/unique_sound/3Q.mp3"
 };
 const AUDIO_BASE_PATH = "./assests/sound/";
 const BGM_SOURCES = {
@@ -9584,6 +9585,8 @@ function startChapter4EndingPages() {
   startChapterCompleteTransition("...", () => {
     startChapterCompleteTransition("第四章 VT綁架事件...", () => {
       startChapterCompleteTransition("以及...", () => {
+        const _3qSfx = new Audio(UNIQUE_SKILL_SOUND_SOURCES.hisada_3Q);
+        _3qSfx.play().catch(() => {});
         startChapterCompleteTransition("Thank you 久田...完", () => {
           startChapterCompleteTransition("幾天過後...", () => {
             startSceneFadeIn(startChapter4PostRescueDiscussion, MAP_CHANGE_FADE_IN_TIME);
