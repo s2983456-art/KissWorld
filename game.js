@@ -20266,7 +20266,7 @@ function followLeaderTrail(npc, delta) {
 
   const speedScale = distance < FOLLOW_SLOW_RADIUS ? 0.22 + (distance / FOLLOW_SLOW_RADIUS) * 0.48 : 0.92;
   let followSpeed = Math.max(Number(npc.speed) || 0, 230);
-  if (leader === player && player.isRunning) {
+  if (player.isRunning) {
     followSpeed *= RUN_SPEED_MULTIPLIER;
   }
   const step = Math.min(distance, followSpeed * speedScale * delta);
